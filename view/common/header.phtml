@@ -1,0 +1,87 @@
+<?php
+$translate = $this->plugin('translate');
+$navDepth = (int) $this->themeSetting('nav_depth') ? (int) $this->themeSetting('nav_depth') -1 : -1;
+?>
+<header class="main-header">
+    <?php echo $userBar; ?>
+    <div class="main-header__main-bar container">
+
+        <!-- Left: Primary Logo (Biblioteca Complutense) -->
+        <div class="main-header__logo-group">
+            <h1 class="main-header__site-title site-title">
+                <a href="<?php echo $site->url(); ?>">
+                <?php if ($this->themeSetting('logo')): ?>
+                    <img src="<?php echo $this->themeSettingAssetUrl('logo'); ?>" alt="<?php echo $this->escapeHtml( $site->title() ); ?>" />
+                <?php else: ?>
+                    <?php echo $this->escapeHtml( $site->title() ); ?>
+                <?php endif; ?>
+                </a>
+            </h1>
+
+            <!-- Center: Secondary PDC Logo (add your PDC image path here) -->
+            <?php if ($this->themeSetting('secondary_logo')): ?>
+            <div class="main-header__secondary-logo">
+                <a href="<?php echo $site->url(); ?>">
+                    <img src="<?php echo $this->themeSettingAssetUrl('secondary_logo'); ?>" alt="Patrimonio Digital Complutense" />
+                </a>
+            </div>
+            <?php endif; ?>
+        </div>
+
+        <!-- Right: Navigation + Search -->
+        <div class="main-header__nav-search">
+            <nav class="main-navigation">
+                <div class="main-navigation__container">
+                    <?php
+                    echo $site->publicNav()->menu()->renderMenu(null, [
+                        'addClassToListItem' => true,
+                        'maxDepth' => $navDepth
+                    ]);
+                    ?>
+                </div>
+                <button
+                     class="main-navigation__toggle"
+                     aria-expanded="false"
+                     aria-controls="menu-drawer">
+                    <span class="sr-only">Open menu</span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </button>
+            </nav>
+
+            <!-- Inline Search -->
+            <div class="main-header__search-form">
+                <?php echo $this->partial('common/search-form'); ?>
+            </div>
+        </div>
+
+    </div>
+    <?php echo $this->partial('common/menu-drawer'); ?>
+	<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const searchForm = document.querySelector('.main-header__search-form');
+    const searchInput = document.getElementById('fulltext-search');
+    const searchBtn = document.getElementById('search-submit');
+
+    searchBtn.addEventListener('click', function (e) {
+        if (!searchForm.classList.contains('open')) {
+            // First click — just open the input, don't submit
+            e.preventDefault();
+            searchForm.classList.add('open');
+            searchInput.value = '';
+            searchInput.focus();
+        }
+        // If already open, allow normal form submission
+    });
+
+    // Close if user clicks outside
+    document.addEventListener('click', function (e) {
+        if (!searchForm.contains(e.target)) {
+            searchForm.classList.remove('open');
+            searchInput.value = '';
+        }
+    });
+});
+</script>
+</header>
