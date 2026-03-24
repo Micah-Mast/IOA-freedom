@@ -49,7 +49,7 @@ if ($userBar) {
 				--accent: <?php echo $accentColor; ?>;
 				--accent-dark: <?php echo $this->ShadeColor($accentColor, -10); ?>;
 			}
-			
+
 			<?php if($bannerHeightMobile): ?>
 				@media screen and (max-width:768px) {
 					.banner {
@@ -66,6 +66,419 @@ if ($userBar) {
 		<?php echo $this->partial('common/header', ['userBar' => $userBar, 'site' => $site]); ?>
 
 		<?php echo $this->partial('common/banner'); ?>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Poppins:wght@300;400;500;600&display=swap');
+
+    /* === TIPOGRAFÍA GLOBAL === */
+    body { font-family: 'Poppins', sans-serif; font-weight: 300; }
+    h1, h2, h3, h4, h5, h6 { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 700; letter-spacing: -0.02em; }
+    .resource-list h3, .item.show h1 { font-family: 'Cormorant Garamond', serif; }
+
+    /* === CONTENEDOR GENERAL DE METADATOS === */
+    .metadata { max-width: 960px; margin: 0 auto 2rem auto; }
+    /* === DOS COLUMNAS === */ 
+    .metadata dl {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 0 1.5rem !important;
+        border: none !important;
+        margin-bottom: 0 !important;
+    }
+
+    /* === CADA CAMPO === */
+    .metadata dl div.property {
+        display: grid !important;
+        grid-template-columns: 130px 1fr !important;
+        border: 1px solid #DEDBD5 !important;
+        margin-bottom: -1px !important;
+        min-height: 42px;
+    }
+    .metadata dl div.property dt {
+        background-color: #F4F4F2;
+        padding: 0.6rem 0.8rem;
+        font-size: 0.68rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: #555550;
+        border-right: 1px solid #DEDBD5;
+        display: flex;
+        align-items: center;
+    }
+    .metadata dl div.property dd {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.88rem;
+        color: #111111;
+        display: flex;
+        align-items: center;
+        margin: 0;
+    }
+
+    /* === SEPARADORES DE SECCIÓN (Ocupan las dos columnas completas) === */
+    .metadata dl div.property.ioa-seccion {
+        grid-column: 1 / -1 !important;
+        grid-template-columns: 1fr !important;
+        background-color: #111111 !important;
+        border: none !important;
+        border-bottom: 4px solid #ffa700 !important;
+        cursor: pointer;
+        margin-top: 1.2rem !important;
+    }
+    .metadata dl div.property.ioa-seccion dd { display: none !important; }
+    .metadata dl div.property.ioa-seccion dt {
+        background-color: #111111 !important;
+        color: #ffa700 !important;
+        width: 100% !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        letter-spacing: 0.2em !important;
+    }
+
+    /* ===  Ícono acordeón === */
+    .ioa-toggle { color: #ffa700; font-size: 0.9rem; margin-left: auto; }
+    /* === Campos ocultos en acordeón === */ 
+    .metadata dl div.property.ioa-oculto { display: none !important; visibility: hidden !important; }
+
+    /* === COLUMNA DE MEDIOS MÁS ANCHA  === */
+    .metadata dl div.property:has(dd a.resource-link img) {
+        grid-column: 1 / -1 !important;
+        grid-template-columns: 130px 1fr !important;
+    }
+    .metadata dl div.property:has(dd a.resource-link img) img {
+        width: 120px !important; height: 120px !important;
+        object-fit: cover !important; border: 1px solid #DEDBD5 !important;
+    }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 768px) { .metadata dl { grid-template-columns: 1fr !important; } }
+</style>
+<?php if (strpos($_SERVER['REQUEST_URI'], '/page/home') !== false): ?>
+<style>
+/* === SLIDER === */
+.ioa-slider {
+    position: relative;
+    width: 100%;
+    height: 430px;
+    overflow: hidden;
+    background: #111111;
+    margin-bottom: 0;
+}
+.ioa-slider-track {
+    display: flex;
+    height: 100%;
+    transition: transform 0.7s cubic-bezier(0.77, 0, 0.175, 1);
+}
+.ioa-slide { min-width: 100%; height: 100%; position: relative; }
+.ioa-slide img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+    filter: brightness(0.7);
+}
+.ioa-slide-caption {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 2.5rem 3rem;
+    background: linear-gradient(transparent, rgba(0,0,0,0.88));
+}
+.ioa-slide-caption p {
+    font-family: 'Quicksand', sans-serif;
+    color: #ffa700; font-size: 0.75rem;
+    font-weight: 500; letter-spacing: 0.2em;
+    text-transform: uppercase; margin: 0 0 0.4rem 0;
+}
+.ioa-slide-caption h2 {
+    font-family: 'Arvo', serif;
+    color: #ffffff; font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+    font-weight: 700; margin: 0; letter-spacing: -0.02em;
+}
+.ioa-btn {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: rgba(17,17,17,0.7); border: 1px solid #ffa700;
+    color: #ffa700; width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 1.2rem; z-index: 10;
+    transition: all 0.2s ease;
+}
+.ioa-btn:hover { background: #ffa700; color: #111111; }
+.ioa-btn-prev { left: 1rem; }
+.ioa-btn-next { right: 1rem; }
+.ioa-dots {
+    position: absolute; bottom: 1.2rem; right: 1.5rem;
+    display: flex; gap: 0.4rem; z-index: 10;
+}
+.ioa-dot {
+    width: 8px; height: 8px;
+    background: rgba(255,255,255,0.4);
+    border: 1px solid rgba(255,255,255,0.6);
+    cursor: pointer; transition: all 0.2s ease;
+}
+.ioa-dot.active { background: #ffa700; border-color: #ffa700; }
+
+/* === COLECCIONES === */
+.ioa-colecciones {
+    padding: 4rem 2rem;
+    background: #000000;
+}
+.ioa-colecciones-titulo {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+.ioa-colecciones-titulo h2 {
+    font-family: 'Arvo', serif;
+    color: #ffffff;
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+    font-weight: 700; margin: 0 0 0.5rem 0;
+    letter-spacing: -0.02em;
+}
+.ioa-colecciones-titulo p {
+    font-family: 'Quicksand', sans-serif;
+    color: rgba(255,255,255,0.6);
+    font-size: 0.82rem; font-weight: 300;
+    letter-spacing: 0.1em; margin: 0;
+}
+.ioa-colecciones-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.ioa-coleccion {
+    position: relative; height: 320px;
+    overflow: hidden; display: block;
+    text-decoration: none;
+    box-shadow: 3px 3px 0px rgba(255,255,255,0.3);
+    transition: all 0.3s ease;
+}
+.ioa-coleccion:hover {
+    box-shadow: 5px 5px 0px #ffa700;
+    transform: translate(-2px, -2px);
+}
+.ioa-coleccion img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+    filter: brightness(0.55);
+    transition: filter 0.3s ease, transform 0.4s ease;
+}
+.ioa-coleccion:hover img {
+    filter: brightness(0.4);
+    transform: scale(1.04);
+}
+.ioa-coleccion-caption {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 1.5rem;
+    background: linear-gradient(transparent, rgba(0,0,0,0.9));
+}
+.ioa-coleccion-label {
+    display: inline-block;
+    background: #ffa700; color: #111111;
+    font-family: 'Quicksand', sans-serif;
+    font-size: 0.6rem; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    padding: 0.2rem 0.6rem; margin-bottom: 0.5rem;
+}
+.ioa-coleccion-titulo {
+    font-family: 'Arvo', serif;
+    color: #ffffff; font-size: 1.5rem;
+    font-weight: 700; margin: 0 0 0.3rem 0; line-height: 1.2;
+}
+.ioa-coleccion-ver {
+    font-family: 'Quicksand', sans-serif;
+    color: rgba(255,255,255,0);
+    font-size: 0.72rem; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    display: flex; align-items: center; gap: 0.4rem;
+    transition: color 0.3s ease;
+}
+.ioa-coleccion:hover .ioa-coleccion-ver { color: #ffa700; }
+.ioa-coleccion-ver::after { content: '→'; }
+
+/* === CIFRAS === */
+.ioa-cifras {
+    background-color: #ffffff;
+    padding: 4rem 2rem;
+    margin: 0;
+}
+.ioa-cifras-titulo {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+.ioa-cifras-titulo h2 {
+    font-family: 'Arvo', serif;
+    color: #111111;
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+    font-weight: 700; margin: 0 0 0.5rem 0;
+    letter-spacing: -0.02em;
+}
+.ioa-cifras-titulo p {
+    font-family: 'Quicksand', sans-serif;
+    color: #555550; font-size: 0.82 rem;
+    font-weight: 300; letter-spacing: 0.1em;
+    text-transform: uppercase; margin: 0;
+}
+.ioa-cifras-grid {
+    display: flex; justify-content: center;
+    flex-wrap: wrap; gap: 2rem;
+    max-width: 1100px; margin: 0 auto;
+}
+.ioa-cifra {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    width: 160px; height: 160px;
+    border: 2px solid #ffa700; border-radius: 50%;
+    text-align: center; padding: 1rem;
+    transition: all 0.3s ease;
+}
+.ioa-cifra:hover { background-color: #ffa700; transform: scale(1.05); }
+.ioa-cifra:hover .ioa-cifra-numero,
+.ioa-cifra:hover .ioa-cifra-label { color: #111111; }
+.ioa-cifra-numero {
+    font-family: 'Arvo', serif;
+    font-size: 1.8rem; font-weight: 700;
+    color: #ffa700; line-height: 1;
+    margin-bottom: 0.4rem; transition: color 0.3s ease;
+}
+.ioa-cifra-label {
+    font-family: 'Quicksand', sans-serif;
+    font-size: 0.68rem; font-weight: 400;
+    color: #555550; text-transform: uppercase;
+    letter-spacing: 0.08em; line-height: 1.3;
+    transition: color 0.3s ease;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+    .ioa-colecciones-grid { grid-template-columns: 1fr 1fr; }
+    .ioa-cifras-grid { gap: 1.2rem; }
+}
+@media (max-width: 480px) {
+    .ioa-colecciones-grid { grid-template-columns: 1fr; }
+    .ioa-cifra { width: 130px; height: 130px; }
+    .ioa-cifra-numero { font-size: 1.4rem; }
+}
+</style>
+
+<!-- 1. SLIDER -->
+<div class="ioa-slider" id="ioaSlider">
+    <div class="ioa-slider-track" id="ioaTrack">
+        <div class="ioa-slide">
+            <img src="http://localhost/omeka-s/files/asset/632f26c30425af34f7169fabdde1e37620c02af5.png" alt="Archivo IOA">
+            <div class="ioa-slide-caption">
+                <p>Instituto Otavaleño de Antropología</p>
+                <h2>Archivo General</h2>
+            </div>
+        </div>
+        <div class="ioa-slide">
+            <img src="http://localhost/omeka-s/files/asset/1d36edade17c58e12fcc396a9cb9cc02f87b6a74.png" alt="Piezas Arqueológicas">
+            <div class="ioa-slide-caption">
+                <p>Museo Arqueológico y Etnográfico</p>
+                <h2>Fondo Arqueológico</h2>
+            </div>
+        </div>
+        <div class="ioa-slide">
+            <img src="http://localhost/omeka-s/files/asset/e9b70b7f82388493123a4f9006a7bb4ffda6649b.jpg" alt="Archivo IOA">
+            <div class="ioa-slide-caption">
+                <p>Memoria e Historia</p>
+                <h2>Archivo Audiovisual</h2>
+            </div>
+        </div>
+        <div class="ioa-slide">
+            <img src="http://localhost/omeka-s/files/asset/583495ba697b9aa0b7b79aa37f7f6d3bed669062.jpg" alt="Archivo IOA">
+            <div class="ioa-slide-caption">
+                <p>Investigación</p>
+                <h2>Archivo Documental</h2>
+            </div>
+        </div>
+    </div>
+    <button class="ioa-btn ioa-btn-prev" id="ioaPrev">&#8592;</button>
+    <button class="ioa-btn ioa-btn-next" id="ioaNext">&#8594;</button>
+    <div class="ioa-dots">
+        <div class="ioa-dot active" data-index="0"></div>
+        <div class="ioa-dot" data-index="1"></div>
+        <div class="ioa-dot" data-index="2"></div>
+        <div class="ioa-dot" data-index="3"></div>
+    </div>
+</div>
+
+<!-- 2. COLECCIONES -->
+<div class="ioa-colecciones">
+    <div class="ioa-colecciones-titulo">
+        <h2>Nuestras Colecciones</h2>
+    </div>
+    <div class="ioa-colecciones-grid">
+        <a class="ioa-coleccion" href="/omeka-s/s/archivoioa/page/arqueologia">
+            <img src="http://localhost/omeka-s/files/asset/e424340967eb3dda37f1da66cedbb8adb39a57cb.jpg" alt="Arqueológico">
+            <div class="ioa-coleccion-caption">
+                <span class="ioa-coleccion-label">Colección</span>
+                <h3 class="ioa-coleccion-titulo">Arqueológica</h3>
+                <span class="ioa-coleccion-ver">Explorar colección</span>
+            </div>
+        </a>
+        <a class="ioa-coleccion" href="/omeka-s/s/archivoioa/page/etnografico">
+            <img src="http://localhost/omeka-s/files/asset/3763edba7ba58d9798ad232ef6093f8691d4d260.jpg" alt="Etnográfico">
+            <div class="ioa-coleccion-caption">
+                <span class="ioa-coleccion-label">Colección</span>
+                <h3 class="ioa-coleccion-titulo">Etnográfica</h3>
+                <span class="ioa-coleccion-ver">Explorar colección</span>
+            </div>
+        </a>
+        <a class="ioa-coleccion" href="/omeka-s/s/archivoioa/page/archivodocumental">
+            <img src="http://localhost/omeka-s/files/asset/a866aa30fd22b382a21eb9a474d45ffdfe1d43af.jpg" alt="Archivo Documental">
+            <div class="ioa-coleccion-caption">
+                <span class="ioa-coleccion-label">Colección</span>
+                <h3 class="ioa-coleccion-titulo">Documental</h3>
+                <span class="ioa-coleccion-ver">Explorar colección</span>
+            </div>
+        </a>
+        <a class="ioa-coleccion" href="/omeka-s/s/archivoioa/page/archivoaudiovisual">
+            <img src="http://localhost/omeka-s/files/asset/bcea02a8c2a84683a996548e844b0678a7afca47.jpg" alt="Archivo Audiovisual">
+            <div class="ioa-coleccion-caption">
+                <span class="ioa-coleccion-label">Colección</span>
+                <h3 class="ioa-coleccion-titulo">Audiovisual</h3>
+                <span class="ioa-coleccion-ver">Explorar colección</span>
+            </div>
+        </a>
+        <a class="ioa-coleccion" href="/omeka-s/s/archivoioa/page/mapas">
+            <img src="http://localhost/omeka-s/files/asset/b25256edb2c097dcda4c89351cba8a9f2ccb3085.jpg" alt="Cartografía">
+            <div class="ioa-coleccion-caption">
+                <span class="ioa-coleccion-label">Colección</span>
+                <h3 class="ioa-coleccion-titulo">Cartográfica</h3>
+                <span class="ioa-coleccion-ver">Explorar colección</span>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- 3. CIFRAS -->
+<div class="ioa-cifras">
+    <div class="ioa-cifras-titulo">
+        <h2>El Archivo en Números</h2>
+            </div>
+    <div class="ioa-cifras-grid">
+        <div class="ioa-cifra">
+            <span class="ioa-cifra-numero">60</span>
+            <span class="ioa-cifra-label">años de historia</span>
+        </div>
+        <div class="ioa-cifra">
+            <span class="ioa-cifra-numero">+7.000</span>
+            <span class="ioa-cifra-label">documentos históricos</span>
+        </div>
+        <div class="ioa-cifra">
+            <span class="ioa-cifra-numero">+500</span>
+            <span class="ioa-cifra-label">publicaciones</span>
+        </div>
+        <div class="ioa-cifra">
+            <span class="ioa-cifra-numero">+5.740</span>
+            <span class="ioa-cifra-label">imágenes</span>
+        </div>
+        <div class="ioa-cifra">
+            <span class="ioa-cifra-numero">+2.000</span>
+            <span class="ioa-cifra-label">recursos sonoros</span>
+        </div>
+    </div>
+</div>
+
+<?php endif; ?>
 
 		<div id="content" class="container" role="main" tabindex="-1">
 			<?php echo $this->content; ?>
@@ -78,5 +491,114 @@ if ($userBar) {
 			->prependFile($this->assetUrl('js/navigation.js'))
 			->prependFile($this->assetUrl('js/script.js'));
 		?>
+
+		<script>
+		document.addEventListener('DOMContentLoaded', function () {
+
+			// — Slider —
+			(function() {
+				var track = document.getElementById('ioaTrack');
+				if (!track) return;
+				var dots = document.querySelectorAll('.ioa-dot');
+				var current = 0;
+				var total = 4;
+				var duration = 5000;
+				var timer;
+
+				function goTo(index) {
+					current = (index + total) % total;
+					track.style.transform = 'translateX(-' + (current * 100) + '%)';
+					dots.forEach(function(d) { d.classList.remove('active'); });
+					dots[current].classList.add('active');
+				}
+
+				function autoPlay() {
+					clearInterval(timer);
+					timer = setInterval(function() { goTo(current + 1); }, duration);
+				}
+
+				document.getElementById('ioaPrev').addEventListener('click', function() {
+					goTo(current - 1); autoPlay();
+				});
+				document.getElementById('ioaNext').addEventListener('click', function() {
+					goTo(current + 1); autoPlay();
+				});
+				dots.forEach(function(dot) {
+					dot.addEventListener('click', function() {
+						goTo(parseInt(this.getAttribute('data-index')));
+						autoPlay();
+					});
+				});
+
+				autoPlay();
+			})();
+
+			// — Acordeón secciones —
+			var textosSecciones = [
+				'datos de identificacion',
+				'estado general del bien',
+				'ubicacion ioa',
+				'contexto cultural',
+				'descripcion morfologica',
+				'tamano',
+				'tecnica',
+				'clasificacion estilistica',
+				'clasificacion funcional'
+			];
+
+			function normalizar(texto) {
+				return texto.toLowerCase()
+					.normalize('NFD')
+					.replace(/[\u0300-\u036f]/g, '')
+					.replace(/[^a-z0-9 ]/g, '')
+					.trim();
+			}
+
+			var propiedades = document.querySelectorAll('.metadata dl div.property');
+			propiedades.forEach(function (prop) {
+				var dt = prop.querySelector('dt');
+				if (dt) {
+					var texto = normalizar(dt.textContent);
+					textosSecciones.forEach(function (seccion) {
+						if (texto === seccion) {
+							prop.classList.add('ioa-seccion');
+						}
+					});
+				}
+			});
+
+			var secciones = document.querySelectorAll('.metadata dl div.property.ioa-seccion');
+			secciones.forEach(function (seccion) {
+				var dt = seccion.querySelector('dt');
+				var textoOriginal = dt.textContent.trim();
+				dt.innerHTML = textoOriginal + ' <span class="ioa-toggle">▶</span>';
+
+				var campos = [];
+				var siguiente = seccion.nextElementSibling;
+				while (siguiente && !siguiente.classList.contains('ioa-seccion')) {
+					campos.push(siguiente);
+					siguiente = siguiente.nextElementSibling;
+				}
+
+				campos.forEach(function (c) { c.classList.add('ioa-oculto'); });
+
+				seccion.addEventListener('click', function () {
+					var abierto = seccion.classList.contains('ioa-abierto');
+					var toggle = seccion.querySelector('.ioa-toggle');
+					if (abierto) {
+						campos.forEach(function (c) { c.classList.add('ioa-oculto'); });
+						seccion.classList.remove('ioa-abierto');
+						toggle.textContent = '▶';
+					} else {
+						campos.forEach(function (c) { c.classList.remove('ioa-oculto'); });
+						seccion.classList.add('ioa-abierto');
+						toggle.textContent = '▼';
+					}
+				});
+			});
+
+		});
+		</script>
+
 	</body>
 </html>
