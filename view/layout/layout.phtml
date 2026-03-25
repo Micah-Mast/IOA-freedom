@@ -73,12 +73,136 @@ if ($userBar) {
     body { font-family: 'Poppins', sans-serif; font-weight: 300; }
     h1, h2, h3, h4, h5, h6 { font-family: 'Cormorant Garamond', Georgia, serif; font-weight: 700; letter-spacing: -0.02em; }
     .resource-list h3, .item.show h1 { font-family: 'Cormorant Garamond', serif; }
+    
+    /* Parent */
+    header nav ul li {
+        position: relative;
+        display: inline-block;
+    }
 
+    /* First dropdown */
+    header nav ul li > ul {
+        position: absolute;
+        top: 100%;
+        left: 0; /* JS will override this */
+
+        width: 100vw;
+
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.15s ease;
+
+        z-index: 9999;
+        background: #111111;
+        padding: 10px;
+        margin: 0;
+
+        display: flex;
+        flex-direction: row;
+        white-space: nowrap;
+
+        overflow: visible;
+    }
+
+    /* Nested dropdowns */
+    header nav ul li ul li ul {
+        position: absolute;
+        top: 100%;
+        left: 0;
+
+        min-width: 200px;
+        width: auto;
+
+        background: #222222;
+        display: block;
+        padding: 10px;
+
+        z-index: 10000;
+    }
+
+    /* Prevent clipping anywhere */
+    header nav,
+    header nav ul,
+    header nav ul li,
+    header nav ul li ul,
+    header nav ul li ul li {
+        overflow: visible !important;
+    }
+
+    /* Nested items */
+    header nav ul li ul li ul li {
+        display: block;
+        margin-bottom: 5px;
+        width: 100%;
+    }
+
+    /* Arrow */
+    header nav ul li ul li:has(ul) > a::after {
+        content: ' ▼';
+        margin-left: 5px;
+        font-size: 0.7em;
+    }
+
+    /* Links */
+    header nav ul li ul li ul li a {
+        display: block;
+        padding: 5px 10px;
+    }
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('header nav ul li').forEach(menuItem => {
+    const dropdown = menuItem.querySelector(':scope > ul');
+    if (!dropdown) return;
+
+    let hideTimeout;
+
+    menuItem.addEventListener('mouseenter', () => {
+        clearTimeout(hideTimeout);
+
+        const isTopLevel = menuItem.parentElement.closest('li') === null;
+
+        if (isTopLevel) {
+          const rect = menuItem.getBoundingClientRect();
+
+          // Move dropdown so its LEFT edge aligns with viewport LEFT
+          dropdown.style.left = `${-rect.left}px`;
+          }
+
+        dropdown.style.opacity = '1';
+        dropdown.style.visibility = 'visible';
+        dropdown.style.pointerEvents = 'auto';
+    });
+
+    menuItem.addEventListener('mouseleave', () => {
+        hideTimeout = setTimeout(() => {
+            dropdown.style.opacity = '0';
+            dropdown.style.visibility = 'hidden';
+            dropdown.style.pointerEvents = 'none';
+        }, 120);
+    });
+
+    dropdown.addEventListener('mouseenter', () => {
+        clearTimeout(hideTimeout);
+    });
+
+    dropdown.addEventListener('mouseleave', () => {
+        hideTimeout = setTimeout(() => {
+            dropdown.style.opacity = '0';
+            dropdown.style.visibility = 'hidden';
+            dropdown.style.pointerEvents = 'none';
+        }, 120);
+    });
+  });
+});
+</script>
+<style>
     /* === CONTENEDOR GENERAL DE METADATOS === */
     .metadata { max-width: 960px; margin: 0 auto 2rem auto; }
     /* === DOS COLUMNAS === */ 
     .metadata dl {
-        display: grid !important;
+        display: grid;
         grid-template-columns: 1fr 1fr !important;
         gap: 0 1.5rem !important;
         border: none !important;
@@ -87,7 +211,7 @@ if ($userBar) {
 
     /* === CADA CAMPO === */
     .metadata dl div.property {
-        display: grid !important;
+        display: grid;
         grid-template-columns: 130px 1fr !important;
         border: 1px solid #DEDBD5 !important;
         margin-bottom: -1px !important;
@@ -492,113 +616,102 @@ if ($userBar) {
 			->prependFile($this->assetUrl('js/script.js'));
 		?>
 
-		<script>
-		document.addEventListener('DOMContentLoaded', function () {
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
 
-			// — Slider —
-			(function() {
-				var track = document.getElementById('ioaTrack');
-				if (!track) return;
-				var dots = document.querySelectorAll('.ioa-dot');
-				var current = 0;
-				var total = 4;
-				var duration = 5000;
-				var timer;
+        // — Slider (Kept original logic) —
+        (function() {
+            var track = document.getElementById('ioaTrack');
+            if (!track) return;
+            var dots = document.querySelectorAll('.ioa-dot');
+            var current = 0;
+            var total = 4;
+            var duration = 5000;
+            var timer;
 
-				function goTo(index) {
-					current = (index + total) % total;
-					track.style.transform = 'translateX(-' + (current * 100) + '%)';
-					dots.forEach(function(d) { d.classList.remove('active'); });
-					dots[current].classList.add('active');
-				}
+            function goTo(index) {
+                current = (index + total) % total;
+                track.style.transform = 'translateX(-' + (current * 100) + '%)';
+                dots.forEach(function(d) { d.classList.remove('active'); });
+                dots[current].classList.add('active');
+            }
 
-				function autoPlay() {
-					clearInterval(timer);
-					timer = setInterval(function() { goTo(current + 1); }, duration);
-				}
+            function autoPlay() {
+                clearInterval(timer);
+                timer = setInterval(function() { goTo(current + 1); }, duration);
+            }
 
-				document.getElementById('ioaPrev').addEventListener('click', function() {
-					goTo(current - 1); autoPlay();
-				});
-				document.getElementById('ioaNext').addEventListener('click', function() {
-					goTo(current + 1); autoPlay();
-				});
-				dots.forEach(function(dot) {
-					dot.addEventListener('click', function() {
-						goTo(parseInt(this.getAttribute('data-index')));
-						autoPlay();
-					});
-				});
+            document.getElementById('ioaPrev').addEventListener('click', function() {
+                goTo(current - 1); autoPlay();
+            });
+            document.getElementById('ioaNext').addEventListener('click', function() {
+                goTo(current + 1); autoPlay();
+            });
+            dots.forEach(function(dot) {
+                dot.addEventListener('click', function() {
+                    goTo(parseInt(this.getAttribute('data-index')));
+                    autoPlay();
+                });
+            });
 
-				autoPlay();
-			})();
+            autoPlay();
+        })();
 
-			// — Acordeón secciones —
-			var textosSecciones = [
-				'datos de identificacion',
-				'estado general del bien',
-				'ubicacion ioa',
-				'contexto cultural',
-				'descripcion morfologica',
-				'tamano',
-				'tecnica',
-				'clasificacion estilistica',
-				'clasificacion funcional'
-			];
+        // — Secciones (Always Open) —
+        var textosSecciones = [
+            'datos de identificacion',
+            'estado general del bien',
+            'ubicacion ioa',
+            'contexto cultural',
+            'descripcion morfologica',
+            'tamano',
+            'tecnica',
+            'clasificacion estilistica',
+            'clasificacion funcional'
+        ];
 
-			function normalizar(texto) {
-				return texto.toLowerCase()
-					.normalize('NFD')
-					.replace(/[\u0300-\u036f]/g, '')
-					.replace(/[^a-z0-9 ]/g, '')
-					.trim();
-			}
+        function normalizar(texto) {
+            return texto.toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9 ]/g, '')
+                .trim();
+        }
 
-			var propiedades = document.querySelectorAll('.metadata dl div.property');
-			propiedades.forEach(function (prop) {
-				var dt = prop.querySelector('dt');
-				if (dt) {
-					var texto = normalizar(dt.textContent);
-					textosSecciones.forEach(function (seccion) {
-						if (texto === seccion) {
-							prop.classList.add('ioa-seccion');
-						}
-					});
-				}
-			});
+        var propiedades = document.querySelectorAll('.metadata dl div.property');
+        propiedades.forEach(function (prop) {
+            var dt = prop.querySelector('dt');
+            if (dt) {
+                var texto = normalizar(dt.textContent);
+                textosSecciones.forEach(function (seccion) {
+                    if (texto === seccion) {
+                        prop.classList.add('ioa-seccion');
+                    }
+                });
+            }
+        });
 
-			var secciones = document.querySelectorAll('.metadata dl div.property.ioa-seccion');
-			secciones.forEach(function (seccion) {
-				var dt = seccion.querySelector('dt');
-				var textoOriginal = dt.textContent.trim();
-				dt.innerHTML = textoOriginal + ' <span class="ioa-toggle">▶</span>';
+        var secciones = document.querySelectorAll('.metadata dl div.property.ioa-seccion');
+        secciones.forEach(function (seccion) {
+            var dt = seccion.querySelector('dt');
+            var textoOriginal = dt.textContent.trim();
 
-				var campos = [];
-				var siguiente = seccion.nextElementSibling;
-				while (siguiente && !siguiente.classList.contains('ioa-seccion')) {
-					campos.push(siguiente);
-					siguiente = siguiente.nextElementSibling;
-				}
+            // Replace arrow with a dash and mark as open
+            dt.innerHTML = textoOriginal + ' <span class="ioa-toggle">-</span>';
+            seccion.classList.add('ioa-abierto');
 
-				campos.forEach(function (c) { c.classList.add('ioa-oculto'); });
+            var siguiente = seccion.nextElementSibling;
+            while (siguiente && !siguiente.classList.contains('ioa-seccion')) {
+                // Ensure no "hidden" classes are applied
+                siguiente.classList.remove('ioa-oculto');
+                siguiente = siguiente.nextElementSibling;
+            }
 
-				seccion.addEventListener('click', function () {
-					var abierto = seccion.classList.contains('ioa-abierto');
-					var toggle = seccion.querySelector('.ioa-toggle');
-					if (abierto) {
-						campos.forEach(function (c) { c.classList.add('ioa-oculto'); });
-						seccion.classList.remove('ioa-abierto');
-						toggle.textContent = '▶';
-					} else {
-						campos.forEach(function (c) { c.classList.remove('ioa-oculto'); });
-						seccion.classList.add('ioa-abierto');
-						toggle.textContent = '▼';
-					}
-				});
-			});
+            // Removed the click event listener entirely so it stays static
+        });
 
-		});
-		</script>
+    });
+    </script>
 
 	</body>
 </html>
